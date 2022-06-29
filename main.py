@@ -7,23 +7,29 @@ RED = "#e7305b"
 GREEN = "#9bdeac"
 YELLOW = "#f7f5dd"
 FONT_NAME = "Courier"
-WORK_MIN = 2
-SHORT_BREAK_MIN = 1
-LONG_BREAK_MIN = 3
+WORK_MIN = 25
+SHORT_BREAK_MIN = 5
+LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
     global reps
+    window.after_cancel(timer)
+    canvas.itemconfig(timer_text, text="0:00")
     reps = 0
     timer_label.config(text="timer", fg=GREEN)
     start_butt.config(command=start_timer)
-# ---------------------------- TIMER MECHANISM ------------------------------- # 
+    tick_marks.config(text="")
+
+
+# ---------------------------- TIMER MECHANISM ------------------------------- #
 def start_timer():
     start_butt.config(command="")
     global reps
-    reps +=1
+    reps += 1
     work_sec = WORK_MIN * 60
     short_break_sec = SHORT_BREAK_MIN * 60
     long_break_sec = LONG_BREAK_MIN * 60
@@ -48,10 +54,15 @@ def count_down(count):
 
     canvas.itemconfig(timer_text, text=f"{min_display}:{sec_display}")
     if count > 0:
-        window.after(1000, count_down, count - 1)
+        global timer
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
-
+        marks = ""
+        work_sessions = math.floor(reps / 2)
+        for _ in range(work_sessions):
+            marks += "✓"
+        tick_marks.config(text=marks)
 
 
 # ---------------------------- UI SETUP ------------------------------- #
@@ -79,7 +90,7 @@ restart_butt = Button(text="Restart", width=12, pady=5, command=reset_timer)
 restart_butt.grid(row=3, column=2)
 
 # Tick marks
-tick_marks = Label(text="✓", bg=YELLOW, fg=GREEN, font=(FONT_NAME, 18, "italic"))
+tick_marks = Label(bg=YELLOW, fg=GREEN, font=(FONT_NAME, 18, "italic"))
 tick_marks.grid(row=4, column=1)
 
 window.mainloop()
